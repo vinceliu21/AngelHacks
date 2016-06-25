@@ -1,6 +1,6 @@
 import requests
-import nltk
-from nltk.corpus import wordnet as wn
+# import nltk
+# from nltk.corpus import wordnet as wn
 import googlemaps
 from datetime import datetime
 
@@ -12,7 +12,7 @@ Filters out only nouns
 Does additional filtering & processing
 Returns a list of final keywords
 """
-def retrieveNounConcepts(alexa_output):  
+def retrieveAllConcepts(alexa_output):  
     hpeURLPart1 = "https://api.havenondemand.com/1/api/sync/extractconcepts/v1?text=" 
     hpeURLPart2 = "&apikey=7cbdd4a6-b09c-4eac-809e-fcb2dd941819"
     alexa_output_decomposed = alexa_output.split(" ")
@@ -53,14 +53,14 @@ Takes a list of keywords
 Returns google data for locations that correspond to the keywords
 """
 def retrieveGooglePlacesData(final_keywords):
-    print (final_keywords[1])
     gmaps = googlemaps.Client(key='AIzaSyAESaJKQx3j5V27M4FelaWsptwGhn9tkQg')
-    dict =  gmaps.places_nearby((37.408690, -122.074761), language='en-AU', min_price=1, max_price=4, keyword=final_keywords[1], rank_by='distance')
+    for keyword in final_keywords:
+        dict =  gmaps.places_nearby((37.408690, -122.074761), language='en-AU', min_price=1, max_price=4, keyword=keyword, rank_by='distance')
 
-    for key in dict['results']:
-        latitude = key['geometry']['location']['lat']
-        longitude = key['geometry']['location']['lng'] 
-        print key['name'] + " has a rating of " + str(key['rating']) + " at a location of " + str(latitude) + ", " + str(longitude)
+        for key in dict['results']:
+            latitude = key['geometry']['location']['lat']
+            longitude = key['geometry']['location']['lng'] 
+            print key['name'] + " has a rating of " + str(key['rating']) + " at a location of " + str(latitude) + ", " + str(longitude)
 
-retrieveNounConcepts("I want medicine and would like to visit a library")
+retrieveAllConcepts("I want medicine and would like to visit a library")
 
