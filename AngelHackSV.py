@@ -2,11 +2,9 @@ import requests
 import googlemaps
 import operator
 from datetime import datetime
-import IPython
 
 def main():
     retrieveAllConcepts("I want medicine and would like to visit a library")
-    # retrieveSentiment("I love baseball")
     # test = ["medicine", "books", "gym"]
     # retrieveRelatedKeywords(test)
 
@@ -103,12 +101,10 @@ def retrieveGooglePlacesData(final_keywords):
             count = 0
             aggregate_score = 0
             if place_results.has_key("reviews"):
-                #count = 0
 
                 for individual_review in place_results["reviews"]:
                     review_test = individual_review["text"]
                     count = count + 1
-                    #score = retrieveSentiment(review_test)
                     if review_test != "":
                         score = retrieveSentiment(review_test)
                         aggregate_score = aggregate_score + score
