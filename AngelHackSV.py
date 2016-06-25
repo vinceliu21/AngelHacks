@@ -1,13 +1,13 @@
 import requests
-# import nltk
-# from nltk.corpus import wordnet as wn
 import googlemaps
+import operator
 from datetime import datetime
 
 def main():
-    retrieveAllConcepts("I want medicine and would like to visit a library")
-    retrieveSentiment("I love baseball")
-
+    # retrieveAllConcepts("I want medicine and would like to visit a library")
+    # retrieveSentiment("I love baseball")
+    test = ["medicine", "books", "gym"]
+    retrieveRelatedKeywords(test)
 """
 Takes a string literal
 Uses HPE Haven Demand's Concept Extraction API
@@ -31,15 +31,12 @@ def retrieveAllConcepts(alexa_output):
         else:
             concept_list_formatted.append(concept)
     concept_list_formatted_trimmed = set(concept_list_formatted)
-    # for concept in concept_list_formatted:
-    #     print (str(concept))
-    #     if (wn.synsets(concept)[0].pos() == unicode("n", "utf-8")): #If the unicode is a noun
-    #         concept_list_nouns.add(str(concept))
-    #         print (concept)
-    # print (concept_list_nouns)
     final_keywords = filterNounConcepts(concept_list_formatted_trimmed)
     retrieveGooglePlacesData(list(final_keywords))
 
+"""Takes a set of concepts
+Hard-coded if statements filter concepts based on irrelevant words
+"""
 def filterNounConcepts(concept_set_trimmed):
     for keyword in list(concept_set_trimmed):
         if (keyword == "want" or keyword == "need" or keyword == "will" or keyword ==
@@ -49,15 +46,37 @@ def filterNounConcepts(concept_set_trimmed):
             concept_set_trimmed.remove(keyword)
     return concept_set_trimmed
 
+"""Takes a list of keywords
+Returns a list of top 3 "intelligent" related keywords for Google Places API per category
+"""
+def retrieveRelatedKeywords(final_keywords):
+    related_keywords = []
+    for keyword in final_keywords:
+        pre_sorted_related_keywords = {} #Text : Occurences
+        hpeURLPart1 = "https://api.havenondemand.com/1/api/sync/findrelatedconcepts/v1?text=" 
+        hpeURLPart2 = "&apikey=7cbdd4a6-b09c-4eac-809e-fcb2dd941819"
+        res = requests.get(hpeURLPart1 + keyword + hpeURLPart2)
+        related_key_word_list = res.json()["entities"]
+        for related_instance in related_key_word_list:
+            pre_sorted_related_keywords[related_instance["text"]] = related_instance["occurrences"]
+        sorted_related_keywords = sorted(pre_sorted_related_keywords.items(), key = operator.itemgetter(1))
+        if (len(sorted_related_keywords)) <= 2:
+            for related_key in sorted_related_keywords:
+                related_keywords.append(str(related_key[0]))
+        else:
+            last_index = len(sorted_related_keywords)
+            for related_key in sorted_related_keywords[last_index-3:last_index]:    
+                related_keywords.append(str(related_key[0]))
+    print (related_keywords)
+
 """
 Takes a list of keywords
 Returns google data for locations that correspond to the keywords
 """
-def retrieveGooglePlacesData(final_keywords):
+def retrieveGooglePlacesData(keywords):
     gmaps = googlemaps.Client(key='AIzaSyAESaJKQx3j5V27M4FelaWsptwGhn9tkQg')
-    for keyword in final_keywords:
+    for keyword in keywords:
         dict =  gmaps.places_nearby((37.408690, -122.074761), language='en-AU', keyword=keyword, rank_by='distance')
-
         for key in dict['results']:
             latitude = key['geometry']['location']['lat']
             longitude = key['geometry']['location']['lng'] 
@@ -70,9 +89,8 @@ def retrieveGooglePlacesData(final_keywords):
 """
 Takes a string literal
 Uses HPE Haven Demand's Sentiment Analysis API
-Returns an overall sentiment
+Returns an overall sentiment score
 """
-
 def retrieveSentiment(place_review):
     hpeURLPart1 = "https://api.havenondemand.com/1/api/sync/analyzesentiment/v1?text=" 
     hpeURLPart2 = "&apikey=7cbdd4a6-b09c-4eac-809e-fcb2dd941819"
