@@ -4,6 +4,10 @@ import requests
 import googlemaps
 from datetime import datetime
 
+def main():
+    retrieveAllConcepts("I want medicine and would like to visit a library")
+    retrieveSentiment("I love baseball")
+
 """
 Takes a string literal!
 Uses HPE Haven Demand's Concept Extraction API
@@ -15,10 +19,7 @@ Returns a list of final keywords
 def retrieveAllConcepts(alexa_output):  
     hpeURLPart1 = "https://api.havenondemand.com/1/api/sync/extractconcepts/v1?text=" 
     hpeURLPart2 = "&apikey=7cbdd4a6-b09c-4eac-809e-fcb2dd941819"
-    alexa_output_decomposed = alexa_output.split(" ")
-    alexa_output_new = ""
-    for alexa_output_component in alexa_output_decomposed:
-        alexa_output_new += alexa_output_component + " + "
+    alexa_output_new = alexa_output.replace(" ", "+")
     res = requests.get(hpeURLPart1 + alexa_output_new + hpeURLPart2)
     concept_list = res.json()["concepts"]
     concept_list_formatted = []   
@@ -61,10 +62,23 @@ def retrieveGooglePlacesData(final_keywords):
             latitude = key['geometry']['location']['lat']
             longitude = key['geometry']['location']['lng'] 
 
-            if key.has_key("rating"):
+            if key.has_key("rating"): #Not all places have a rating
                 print key['name'] + " has a rating of " + str(key['rating']) + " at a location of " + str(latitude) + ", " + str(longitude)
             else:
                 print key['name'] + " at a location of " + str(latitude) + ", " + str(longitude)
 
-retrieveAllConcepts("I want medicine and would like to visit a library")
+"""
+Takes a string literal!
+Uses HPE Haven Demand's Sentiment Analysis API
+Returns an overall sentiment
+"""
 
+def retrieveSentiment(place_review):
+    hpeURLPart1 = "https://api.havenondemand.com/1/api/sync/analyzesentiment/v1?text=" 
+    hpeURLPart2 = "&apikey=7cbdd4a6-b09c-4eac-809e-fcb2dd941819"
+    place_review_new = place_review.replace(" ", "+")
+    res = requests.get(hpeURLPart1 + place_review_new + hpeURLPart2)
+    overall_sentiment_score = res.json()["aggregate"]["score"]
+    print (overall_sentiment_score)
+
+main()
