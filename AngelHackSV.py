@@ -3,6 +3,7 @@ import requests
 # from nltk.corpus import wordnet as wn
 import googlemaps
 from datetime import datetime
+import IPython
 
 def main():
     retrieveAllConcepts("I want medicine and would like to visit a library")
@@ -55,14 +56,24 @@ Returns google data for locations that correspond to the keywords
 """
 def retrieveGooglePlacesData(final_keywords):
     gmaps = googlemaps.Client(key='AIzaSyAESaJKQx3j5V27M4FelaWsptwGhn9tkQg')
-    for keyword in final_keywords:
-        dict =  gmaps.places_nearby((37.408690, -122.074761), language='en-AU', keyword=keyword, rank_by='distance')
+    final_dict = dict()
+    for category in final_keywords:
+        final_dict[category] = dict()
+        query_map =  gmaps.places_nearby((37.408690, -122.074761), language='en-AU', keyword=category, rank_by='distance')
 
-        for key in dict['results']:
-            latitude = key['geometry']['location']['lat']
-            longitude = key['geometry']['location']['lng'] 
+        for related_place in query_map['results']:
+            # ipython.embed()
+            related_name = related_place['name']
+            final_dict[category][related_name] = dict()
+            latitude = related_place['geometry']['location']['lat']
+            longitude = related_place['geometry']['location']['lng'] 
+            final_dict[category][related_name]['latitude'] = latitude
+            final_dict[category][related_name]['longitude'] = longitude
 
-            place_reference = key['reference']
+            if related_place.has_key('rating'):
+                final_dict[category][related_name]['rating'] = related_place['rating']
+
+            place_reference = related_place['reference']
 
             url = "https://maps.googleapis.com/maps/api/place/details/json?reference="
             place_request = requests.get(url + place_reference + "&key=AIzaSyAESaJKQx3j5V27M4FelaWsptwGhn9tkQg" )
@@ -70,21 +81,25 @@ def retrieveGooglePlacesData(final_keywords):
             dict_places = place_request.json()["result"]
             place_results= place_request.json()["result"]
             count = 0
+            aggregate_score = 0
             if place_results.has_key("reviews"):
                 #count = 0
+
                 for individual_review in place_results["reviews"]:
                     review_test = individual_review["text"]
                     count = count + 1
                     #score = retrieveSentiment(review_test)
                     if review_test != "":
-                        print "review has sentiment analysis of " + str(retrieveSentiment(review_test))
-            
-            print dict_places['name'] + " has " + str(count) + " reviews"
+                        score = retrieveSentiment(review_test)
+                        aggregate_score = aggregate_score + score
+            if count != 0:
+                final_dict[category][related_name]['num_reviews'] = count
+                final_dict[category][related_name]['average_sentiment'] = aggregate_score / count
+    print final_dict
 
-            if key.has_key("rating"): #Not all places have a rating
-                print key['name'] + " has a rating of " + str(key['rating']) + " at a location of " + str(latitude) + ", " + str(longitude)
-            else:
-                print key['name'] + " at a location of " + str(latitude) + ", " + str(longitude)
+            
+
+           
 
 """
 Takes a string literal
@@ -101,5 +116,7 @@ def retrieveSentiment(place_review):
    # print place_review
     overall_sentiment_score = res.json()["aggregate"]["score"]
     return overall_sentiment_score
+
+
 
 main()
