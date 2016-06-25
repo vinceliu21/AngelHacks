@@ -9,6 +9,7 @@ def main():
     # retrieveSentiment("I love baseball")
     # test = ["medicine", "books", "gym"]
     # retrieveRelatedKeywords(test)
+
 """
 Takes a string literal
 Uses HPE Haven Demand's Concept Extraction API
@@ -31,7 +32,7 @@ def retrieveAllConcepts(alexa_output):
                 concept_list_formatted.append(concept_component)
         else:
             concept_list_formatted.append(concept)
-    concept_list_formatted_trimmed = set(concept_list_formatted)
+    concept_list_formatted_trimmed = set(concept_list_formatted) #Remove redundancies
     final_keywords = filterNounConcepts(concept_list_formatted_trimmed)
     retrieveGooglePlacesData(list(final_keywords))
 
@@ -81,6 +82,7 @@ def retrieveGooglePlacesData(final_keywords):
         final_dict[category] = dict()
         query_map =  gmaps.places_nearby((37.408690, -122.074761), language='en-AU', keyword=category, radius=2000)
 
+
         for related_place in query_map['results']:
             # ipython.embed()
             related_name = related_place['name']
@@ -90,15 +92,12 @@ def retrieveGooglePlacesData(final_keywords):
             final_dict[category][related_name]['latitude'] = latitude
             final_dict[category][related_name]['longitude'] = longitude
    
-
             if related_place.has_key('rating'):
                 final_dict[category][related_name]['rating'] = related_place['rating']
 
             place_reference = related_place['reference']
-
             url = "https://maps.googleapis.com/maps/api/place/details/json?reference="
             place_request = requests.get(url + place_reference + "&key=AIzaSyAESaJKQx3j5V27M4FelaWsptwGhn9tkQg" )
-
             dict_places = place_request.json()["result"]
             place_results= place_request.json()["result"]
             count = 0
@@ -118,10 +117,6 @@ def retrieveGooglePlacesData(final_keywords):
                 final_dict[category][related_name]['average_sentiment'] = aggregate_score / count
     print final_dict
 
-            
-
-           
-
 """
 Takes a string literal
 Uses HPE Haven Demand's Sentiment Analysis API
@@ -132,11 +127,7 @@ def retrieveSentiment(place_review):
     hpeURLPart2 = "&apikey=7cbdd4a6-b09c-4eac-809e-fcb2dd941819"
     place_review_new = place_review.replace(" ", "+")
     res = requests.get(hpeURLPart1 + place_review_new + hpeURLPart2)
-
-   # print place_review
     overall_sentiment_score = res.json()["aggregate"]["score"]
     return overall_sentiment_score
-
-
 
 main()
