@@ -9,7 +9,7 @@ def main():
     # retrieveSentiment("I love baseball")
     test = ["medicine", "books", "gym"]
     retrieveRelatedKeywords(test)
-    
+
 """
 Takes a string literal
 Uses HPE Haven Demand's Concept Extraction API
@@ -32,7 +32,7 @@ def retrieveAllConcepts(alexa_output):
                 concept_list_formatted.append(concept_component)
         else:
             concept_list_formatted.append(concept)
-    concept_list_formatted_trimmed = set(concept_list_formatted)
+    concept_list_formatted_trimmed = set(concept_list_formatted) #Remove redundancies
     final_keywords = filterNounConcepts(concept_list_formatted_trimmed)
     retrieveGooglePlacesData(list(final_keywords))
 
