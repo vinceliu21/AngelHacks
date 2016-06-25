@@ -5,10 +5,10 @@ from datetime import datetime
 import IPython
 
 def main():
-    # retrieveAllConcepts("I want medicine and would like to visit a library")
+    retrieveAllConcepts("I want medicine and would like to visit a library")
     # retrieveSentiment("I love baseball")
-    test = ["medicine", "books", "gym"]
-    retrieveRelatedKeywords(test)
+    # test = ["medicine", "books", "gym"]
+    # retrieveRelatedKeywords(test)
 """
 Takes a string literal
 Uses HPE Haven Demand's Concept Extraction API
@@ -74,12 +74,12 @@ def retrieveRelatedKeywords(final_keywords):
 Takes a list of keywords
 Returns google data for locations that correspond to the keywords
 """
-def retrieveGooglePlacesData(keywords):
+def retrieveGooglePlacesData(final_keywords):
     gmaps = googlemaps.Client(key='AIzaSyAESaJKQx3j5V27M4FelaWsptwGhn9tkQg')
     final_dict = dict()
     for category in final_keywords:
         final_dict[category] = dict()
-        query_map =  gmaps.places_nearby((37.408690, -122.074761), language='en-AU', keyword=category, rank_by='distance')
+        query_map =  gmaps.places_nearby((37.408690, -122.074761), language='en-AU', keyword=category, radius=2000)
 
         for related_place in query_map['results']:
             # ipython.embed()
