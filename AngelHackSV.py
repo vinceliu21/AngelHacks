@@ -75,7 +75,9 @@ def retrieveGooglePlacesData(final_keywords):
                 for individual_review in place_results["reviews"]:
                     review_test = individual_review["text"]
                     count = count + 1
-                    print review_test
+                    #score = retrieveSentiment(review_test)
+                    if review_test != "":
+                        print "review has sentiment analysis of " + str(retrieveSentiment(review_test))
             
             print dict_places['name'] + " has " + str(count) + " reviews"
 
@@ -95,7 +97,9 @@ def retrieveSentiment(place_review):
     hpeURLPart2 = "&apikey=7cbdd4a6-b09c-4eac-809e-fcb2dd941819"
     place_review_new = place_review.replace(" ", "+")
     res = requests.get(hpeURLPart1 + place_review_new + hpeURLPart2)
+
+   # print place_review
     overall_sentiment_score = res.json()["aggregate"]["score"]
-    print (overall_sentiment_score)
+    return overall_sentiment_score
 
 main()
