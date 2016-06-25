@@ -81,6 +81,25 @@ def retrieveGooglePlacesData(keywords):
             latitude = key['geometry']['location']['lat']
             longitude = key['geometry']['location']['lng'] 
 
+            place_reference = key['reference']
+
+            url = "https://maps.googleapis.com/maps/api/place/details/json?reference="
+            place_request = requests.get(url + place_reference + "&key=AIzaSyAESaJKQx3j5V27M4FelaWsptwGhn9tkQg" )
+
+            dict_places = place_request.json()["result"]
+            place_results= place_request.json()["result"]
+            count = 0
+            if place_results.has_key("reviews"):
+                #count = 0
+                for individual_review in place_results["reviews"]:
+                    review_test = individual_review["text"]
+                    count = count + 1
+                    #score = retrieveSentiment(review_test)
+                    if review_test != "":
+                        print "review has sentiment analysis of " + str(retrieveSentiment(review_test))
+            
+            print dict_places['name'] + " has " + str(count) + " reviews"
+
             if key.has_key("rating"): #Not all places have a rating
                 print key['name'] + " has a rating of " + str(key['rating']) + " at a location of " + str(latitude) + ", " + str(longitude)
             else:
@@ -96,7 +115,9 @@ def retrieveSentiment(place_review):
     hpeURLPart2 = "&apikey=7cbdd4a6-b09c-4eac-809e-fcb2dd941819"
     place_review_new = place_review.replace(" ", "+")
     res = requests.get(hpeURLPart1 + place_review_new + hpeURLPart2)
+
+   # print place_review
     overall_sentiment_score = res.json()["aggregate"]["score"]
-    print (overall_sentiment_score)
+    return overall_sentiment_score
 
 main()
