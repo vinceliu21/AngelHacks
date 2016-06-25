@@ -55,12 +55,16 @@ Returns google data for locations that correspond to the keywords
 def retrieveGooglePlacesData(final_keywords):
     gmaps = googlemaps.Client(key='AIzaSyAESaJKQx3j5V27M4FelaWsptwGhn9tkQg')
     for keyword in final_keywords:
-        dict =  gmaps.places_nearby((37.408690, -122.074761), language='en-AU', min_price=1, max_price=4, keyword=keyword, rank_by='distance')
+        dict =  gmaps.places_nearby((37.408690, -122.074761), language='en-AU', keyword=keyword, rank_by='distance')
 
         for key in dict['results']:
             latitude = key['geometry']['location']['lat']
             longitude = key['geometry']['location']['lng'] 
-            print key['name'] + " has a rating of " + str(key['rating']) + " at a location of " + str(latitude) + ", " + str(longitude)
+
+            if key.has_key("rating"):
+                print key['name'] + " has a rating of " + str(key['rating']) + " at a location of " + str(latitude) + ", " + str(longitude)
+            else:
+                print key['name'] + " at a location of " + str(latitude) + ", " + str(longitude)
 
 retrieveAllConcepts("I want medicine and would like to visit a library")
 
