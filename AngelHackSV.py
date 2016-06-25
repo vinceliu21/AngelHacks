@@ -9,7 +9,7 @@ def main():
     retrieveSentiment("I love baseball")
 
 """
-Takes a string literal!
+Takes a string literal
 Uses HPE Haven Demand's Concept Extraction API
 Retrieves a list of pertinent concepts
 Filters out only nouns
@@ -68,7 +68,7 @@ def retrieveGooglePlacesData(final_keywords):
                 print key['name'] + " at a location of " + str(latitude) + ", " + str(longitude)
 
 """
-Takes a string literal!
+Takes a string literal
 Uses HPE Haven Demand's Sentiment Analysis API
 Returns an overall sentiment
 """
