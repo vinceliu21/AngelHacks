@@ -2,8 +2,10 @@ import requests
 import googlemaps
 import operator
 from datetime import datetime
+#import Ipython
 
 def main():
+    #RETURN_DIRECTIONS()
     retrieveAllConcepts("I want medicine and would like to visit a library")
     # test = ["medicine", "books", "gym"]
     # retrieveRelatedKeywords(test)
@@ -89,6 +91,7 @@ def retrieveGooglePlacesData(final_keywords):
             longitude = related_place['geometry']['location']['lng'] 
             final_dict[category][related_name]['latitude'] = latitude
             final_dict[category][related_name]['longitude'] = longitude
+            #final_dict[category][related_name]['place_id'] = 
    
             if related_place.has_key('rating'):
                 final_dict[category][related_name]['rating'] = related_place['rating']
@@ -98,6 +101,7 @@ def retrieveGooglePlacesData(final_keywords):
             place_request = requests.get(url + place_reference + "&key=AIzaSyAESaJKQx3j5V27M4FelaWsptwGhn9tkQg" )
             dict_places = place_request.json()["result"]
             place_results= place_request.json()["result"]
+            final_dict[category][related_name]['place_id'] = place_results['place_id']
             count = 0
             aggregate_score = 0
             if place_results.has_key("reviews"):
@@ -111,13 +115,78 @@ def retrieveGooglePlacesData(final_keywords):
             if count != 0:
                 final_dict[category][related_name]['num_reviews'] = count
                 final_dict[category][related_name]['average_sentiment'] = aggregate_score / count
-    print final_dict
+            else:
+                final_dict[category][related_name]['num_reviews'] = 0
+                final_dict[category][related_name]['average_sentiment'] = 0
+    search(final_dict)
+            
 
 """
 Takes a string literal
 Uses HPE Haven Demand's Sentiment Analysis API
 Returns an overall sentiment score
 """
+
+def search(final_dict):
+    final_path = []
+    #best_score = 0
+    poop = ""
+
+    place_to_go = ""
+
+    path_places = []
+
+    for category in final_dict:
+        best_score = 0
+        for place in final_dict[category]:
+            #print final_dict[category][place]['place_id']
+            if final_dict[category][place]['average_sentiment'] > best_score:
+                best_score = final_dict[category][place]['average_sentiment']
+                place_to_go = final_dict[category][place]['place_id']
+                poop = place
+
+        path_places.append(place_to_go)
+        final_path.append(poop)
+
+    RETURN_DIRECTIONS(path_places)
+
+def RETURN_DIRECTIONS(path_places):
+    gmaps = googlemaps.Client(key='AIzaSyAESaJKQx3j5V27M4FelaWsptwGhn9tkQg')
+    #routes = gmaps.directions(path_places[0], path_places[1])
+
+    #https://maps.googleapis.com/maps/api/directions/json?origin=Toronto&destination=Montreal&key=YOUR_API_KEY
+
+    #url = "https://maps.googleapis.com/maps/api/place/details/json?reference="
+    #place_request = requests.get(url + place_reference + "&key=AIzaSyAESaJKQx3j5V27M4FelaWsptwGhn9tkQg" )
+    place_request = requests.get("https://maps.googleapis.com/maps/api/directions/json?origin=place_id:" + path_places[1] + "&destination=place_id:" + "&key=AIzaSyAESaJKQx3j5V27M4FelaWsptwGhn9tkQg")
+
+    ok = place_request.json()
+
+    print ok
+    #Ipython.embed()
+    #for i in ok['routes'][0]['legs']:
+        #print "hi"
+        #print i['steps']['html_instructions']
+        #print i['html_instructions']
+        #print i['duration']['text']
+        #print ok['routes']['legs']['duration']['value']
+
+    #for i in ok['routes'][0]['legs'][0]['steps']:
+     #   print i['html_instructions']
+    #print ok['routes'][0]['legs'][0]['steps'][0]['html_instructions']
+    #directions = ok['routes'][0][]
+
+   # print ok['routes'][0]['legs']
+    #print place_request['status']
+
+
+
+
+
+
+
+
+
 def retrieveSentiment(place_review):
     hpeURLPart1 = "https://api.havenondemand.com/1/api/sync/analyzesentiment/v1?text=" 
     hpeURLPart2 = "&apikey=7cbdd4a6-b09c-4eac-809e-fcb2dd941819"
@@ -127,3 +196,5 @@ def retrieveSentiment(place_review):
     return overall_sentiment_score
 
 main()
+
+
